@@ -1,0 +1,42 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: ""
+      DB_NAME: user_management
+      APP_INTERNAL_BASE_URL: http://127.0.0.1
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.4
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: user_management
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./user_management.example.sql:/docker-entrypoint-initdb.d/01-user-management.sql:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ""
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  vendor_data:

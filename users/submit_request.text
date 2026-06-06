@@ -1,0 +1,43 @@
+    <?php
+    // Start session
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // Connect to database
+    $mysqli = new mysqli('localhost', 'root', '', 'user_management');
+    if ($mysqli->connect_errno) {
+        die("Failed to connect to MySQL: " . $mysqli->connect_error);
+    }
+
+    // ✅ Check if form was submitted
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Collect and sanitize input
+        $category_id = $mysqli->real_escape_string($_POST['category_id']);
+        $pre_repair_no = $mysqli->real_escape_string($_POST['prerepair_no']);
+        $property_no = $mysqli->real_escape_string($_POST['property_number']);
+        $description = $mysqli->real_escape_string($_POST['vehicle_type']);
+        $designation = $mysqli->real_escape_string($_POST['property_designation']);
+        $date_requested = date('Y-m-d');
+        $status = "Pending";
+
+        // ✅ Insert into documents table
+        $stmt = $mysqli->prepare("INSERT INTO documents (equipment, description, property_no, pre_repair_no, status, date_requested)
+                                VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param('ssssss', $category_id, $description, $property_no, $pre_repair_no, $status, $date_requested);
+
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = "Request submitted successfully!";
+        } else {
+            $_SESSION['error_message'] = "Failed to submit request. Error: " . $stmt->error;
+        }
+
+        $stmt->close();
+
+        // ✅ Redirect back to side_request.php
+        header("Location: side_request.php");
+        exit;
+    } else {
+        echo "Invalid request method.";
+    }
+    ?>

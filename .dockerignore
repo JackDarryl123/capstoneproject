@@ -1,0 +1,10 @@
+.git
+.agents
+.codex
+node_modules
+vendor
+*.zip
+*.exe
+cache/*
+temp_qr/*
+users/temp_qr/*
